@@ -241,8 +241,8 @@
                         </execution>
                         <!-- attached to Maven test phase -->
                         <execution>
-                            <id>report</id>
-                            <phase>test</phase>
+                            <id>jacoco-site</id>
+                            <phase>package</phase>
                             <goals>
                                 <goal>report</goal>
                             </goals>

@@ -254,6 +254,7 @@ class LexicalDifferenceCalculator {
         } else if (csm instanceof CsmOrphanCommentsEnding) {
             // nothing to do
         } else if (csm instanceof CsmList) {
+						calculatedSyntaxModelForList(csm, node, elements, change);
         } else if (csm instanceof CsmConditional) {
             CsmConditional csmConditional = (CsmConditional) csm;
             boolean satisfied = change.evaluate(csmConditional, node);
