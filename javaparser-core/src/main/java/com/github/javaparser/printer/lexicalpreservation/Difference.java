@@ -639,6 +639,28 @@ public class Difference {
         return false;
     }
 
+		private void applyAddedDiffElementAfterLBrace(TextElement addedTextElement) {
+            nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
+            // This remove the space in "{ }" when adding a new line
+            while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
+                originalElements.remove(originalIndex - 2);
+                originalIndex--;
+            }
+            for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
+                nodeText.addElement(originalIndex++, e);
+            }
+            // Indentation is painful...
+            // Sometimes we want to force indentation: this is the case when indentation was expected but
+            // was actually not there. For example if we have "{ }" we would expect indentation but it is
+            // not there, so when adding new elements we force it. However if the indentation has been
+            // inserted by us in this transformation we do not want to insert it again
+            if (!addedIndentation) {
+                for (TextElement e : indentationBlock()) {
+                    nodeText.addElement(originalIndex++, e);
+                }
+            }
+		}
+
     private void applyAddedDiffElement(Added added) {
         if (added.isIndent()) {
             for (int i=0;i<STANDARD_INDENTATION_SIZE;i++){
@@ -675,25 +697,7 @@ public class Difference {
             if (addedTextElement.isNewline()) {
                 used = true;
             }
-            nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
-            // This remove the space in "{ }" when adding a new line
-            while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
-                originalElements.remove(originalIndex - 2);
-                originalIndex--;
-            }
-            for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
-                nodeText.addElement(originalIndex++, e);
-            }
-            // Indentation is painful...
-            // Sometimes we want to force indentation: this is the case when indentation was expected but
-            // was actually not there. For example if we have "{ }" we would expect indentation but it is
-            // not there, so when adding new elements we force it. However if the indentation has been
-            // inserted by us in this transformation we do not want to insert it again
-            if (!addedIndentation) {
-                for (TextElement e : indentationBlock()) {
-                    nodeText.addElement(originalIndex++, e);
-                }
-            }
+					applyAddedDiffElementAfterLBrace(addedTextElement);
         }
 
         if (!used) {

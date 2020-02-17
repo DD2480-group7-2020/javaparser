@@ -155,43 +155,7 @@ class LexicalDifferenceCalculator {
         return calculatedSyntaxModelForNode(ConcreteSyntaxModel.forClass(node.getClass()), node);
     }
 
-    private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
-        if (csm instanceof CsmSequence) {
-            CsmSequence csmSequence = (CsmSequence) csm;
-            csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
-        } else if (csm instanceof CsmComment) {
-            // nothing to do
-        } else if (csm instanceof CsmSingleReference) {
-            CsmSingleReference csmSingleReference = (CsmSingleReference)csm;
-            Node child;
-            if (change instanceof PropertyChange && ((PropertyChange)change).getProperty() == csmSingleReference.getProperty()) {
-                child = (Node)((PropertyChange)change).getNewValue();
-            } else {
-                child = csmSingleReference.getProperty().getValueAsSingleReference(node);
-            }
-            if (child != null) {
-                // fix issue #2374
-                // Add node comment if needed (it's not very elegant but it works)
-                // We need to be sure that the node is an ExpressionStmt because we can meet
-                // this class definition
-                // a line comment <This is my class, with my comment> followed by
-                // class A {}
-                // In this case keyworld [class] is considered as a token and [A] is a child element
-                // So if we don't care that the node is an ExpressionStmt we could try to generate a wrong definition
-                // like this [class // This is my class, with my comment A {}]
-                if (node.getComment().isPresent() && node instanceof ExpressionStmt) {
-                    elements.add(new CsmChild(node.getComment().get()));
-                    elements.add(new CsmToken(Kind.EOF.getKind(), Utils.EOL));
-                }
-                elements.add(new CsmChild(child));
-            }
-        } else if (csm instanceof CsmNone) {
-            // nothing to do
-        } else if (csm instanceof CsmToken) {
-            elements.add(csm);
-        } else if (csm instanceof CsmOrphanCommentsEnding) {
-            // nothing to do
-        } else if (csm instanceof CsmList) {
+		private void calculatedSyntaxModelForList(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
             CsmList csmList = (CsmList) csm;
             if (csmList.getProperty().isAboutNodes()) {
                 Object rawValue = change.getValue(csmList.getProperty(), node);
@@ -251,6 +215,45 @@ class LexicalDifferenceCalculator {
                     calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
                 }
             }
+		}
+
+    private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
+        if (csm instanceof CsmSequence) {
+            CsmSequence csmSequence = (CsmSequence) csm;
+            csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
+        } else if (csm instanceof CsmComment) {
+            // nothing to do
+        } else if (csm instanceof CsmSingleReference) {
+            CsmSingleReference csmSingleReference = (CsmSingleReference)csm;
+            Node child;
+            if (change instanceof PropertyChange && ((PropertyChange)change).getProperty() == csmSingleReference.getProperty()) {
+                child = (Node)((PropertyChange)change).getNewValue();
+            } else {
+                child = csmSingleReference.getProperty().getValueAsSingleReference(node);
+            }
+            if (child != null) {
+                // fix issue #2374
+                // Add node comment if needed (it's not very elegant but it works)
+                // We need to be sure that the node is an ExpressionStmt because we can meet
+                // this class definition
+                // a line comment <This is my class, with my comment> followed by
+                // class A {}
+                // In this case keyworld [class] is considered as a token and [A] is a child element
+                // So if we don't care that the node is an ExpressionStmt we could try to generate a wrong definition
+                // like this [class // This is my class, with my comment A {}]
+                if (node.getComment().isPresent() && node instanceof ExpressionStmt) {
+                    elements.add(new CsmChild(node.getComment().get()));
+                    elements.add(new CsmToken(Kind.EOF.getKind(), Utils.EOL));
+                }
+                elements.add(new CsmChild(child));
+            }
+        } else if (csm instanceof CsmNone) {
+            // nothing to do
+        } else if (csm instanceof CsmToken) {
+            elements.add(csm);
+        } else if (csm instanceof CsmOrphanCommentsEnding) {
+            // nothing to do
+        } else if (csm instanceof CsmList) {
         } else if (csm instanceof CsmConditional) {
             CsmConditional csmConditional = (CsmConditional) csm;
             boolean satisfied = change.evaluate(csmConditional, node);
