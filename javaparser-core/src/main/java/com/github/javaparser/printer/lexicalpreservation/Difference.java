@@ -640,16 +640,22 @@ public class Difference {
     }
 
     private void applyAddedDiffElement(Added added) {
+        // CNN = 1
         if (added.isIndent()) {
+            //CNN = 2
             for (int i=0;i<STANDARD_INDENTATION_SIZE;i++){
+                //CNN = 3
                 indentation.add(new TokenTextElement(GeneratedJavaParserConstants.SPACE));
             }
             addedIndentation = true;
             diffIndex++;
             return;
         }
+
         if (added.isUnindent()) {
+            // CNN = 4
             for (int i = 0; i<STANDARD_INDENTATION_SIZE && !indentation.isEmpty(); i++){
+                //CNN = 6
                 indentation.remove(indentation.size() - 1);
             }
             addedIndentation = false;
@@ -660,28 +666,35 @@ public class Difference {
         TextElement addedTextElement = added.toTextElement();
         boolean used = false;
         if (originalIndex > 0 && originalElements.get(originalIndex - 1).isNewline()) {
+            // CNN = 8
             List<TextElement> elements = processIndentation(indentation, originalElements.subList(0, originalIndex - 1));
             boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
             for (TextElement e : elements) {
+                // CNN = 9
                 if (!nextIsRightBrace
                         && e instanceof TokenTextElement
                         && originalElements.get(originalIndex).isToken(((TokenTextElement)e).getTokenKind())) {
+                    // CNN = 12
                     originalIndex++;
                 } else {
                     nodeText.addElement(originalIndex++, e);
                 }
             }
         } else if (isAfterLBrace(nodeText, originalIndex) && !isAReplacement(diffIndex)) {
+          // CNN = 14
             if (addedTextElement.isNewline()) {
+              // CNN = 15
                 used = true;
             }
             nodeText.addElement(originalIndex++, new TokenTextElement(TokenTypes.eolTokenKind()));
             // This remove the space in "{ }" when adding a new line
             while (originalIndex >= 2 && originalElements.get(originalIndex - 2).isSpaceOrTab()) {
+                // CNN = 17
                 originalElements.remove(originalIndex - 2);
                 originalIndex--;
             }
             for (TextElement e : processIndentation(indentation, originalElements.subList(0, originalIndex - 1))) {
+                // CNN = 18
                 nodeText.addElement(originalIndex++, e);
             }
             // Indentation is painful...
@@ -690,16 +703,20 @@ public class Difference {
             // not there, so when adding new elements we force it. However if the indentation has been
             // inserted by us in this transformation we do not want to insert it again
             if (!addedIndentation) {
+                // CNN = 19
                 for (TextElement e : indentationBlock()) {
+                    //CNN = 20
                     nodeText.addElement(originalIndex++, e);
                 }
             }
         }
 
         if (!used) {
+            // CNN = 21
             // Handling trailing comments
             if(nodeText.numberOfElements() > originalIndex + 1 &&
                     nodeText.getTextElement(originalIndex).isComment()) {
+                // CNN = 23
                 // Need to get behind the comment:
                 originalIndex += 2;
                 nodeText.addElement(originalIndex, addedTextElement); // Defer originalIndex increment
@@ -713,10 +730,13 @@ public class Difference {
         }
 
         if (addedTextElement.isNewline()) {
+            // CNN = 24
             boolean followedByUnindent = isFollowedByUnindent(diffElements, diffIndex);
             boolean nextIsRightBrace = nextIsRightBrace(originalIndex);
             boolean nextIsNewLine = nodeText.getTextElement(originalIndex).isNewline();
             if ((!nextIsNewLine && !nextIsRightBrace) || followedByUnindent) {
+                // CNN = 27
+                // Count each boolean expression as one extra CNN
                 originalIndex = adjustIndentation(indentation, nodeText, originalIndex, followedByUnindent);
             }
         }
