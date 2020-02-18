@@ -86,7 +86,7 @@
                             <outputDirectory>${basedir}/target/classes</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../javaparser-core/target/classes</directory>
+                                    <directory>../javaparser-symbol-solver-core/target/classes</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
