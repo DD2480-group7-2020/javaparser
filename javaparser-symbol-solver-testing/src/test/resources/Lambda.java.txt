@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.IntFunction;
 
 @FunctionalInterface
 public interface Lambda {
@@ -27,6 +28,10 @@ public class Agenda {
     public void reduce(){
         List<Integer> a;
         return a.stream().reduce((x,y) -> x * y);
+    }
+
+    public IntFunction<Integer> add(){
+        return p -> p++;
     }
 
     double test(BiFunction<Integer,List,String> func){

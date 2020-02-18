@@ -77,6 +77,22 @@ class LambdaExprContextResolutionTest extends AbstractResolutionTest {
     }
 
     @Test
+    void solveParameterOfLambdaInReturnStmt() {
+        CompilationUnit cu = parseSample("Lambda");
+
+        com.github.javaparser.ast.body.ClassOrInterfaceDeclaration clazz = Navigator.demandClass(cu, "Agenda");
+        MethodDeclaration method = Navigator.demandMethod(clazz, "add");
+        ReturnStmt returnStmt = Navigator.demandReturnStmt(method);
+        LambdaExpr lambdaExpr = (LambdaExpr) returnStmt.getExpression().get();
+
+        Context context = new LambdaExprContext(lambdaExpr, typeSolver);
+
+        Optional<Value> ref = context.solveSymbolAsValue("p");
+        assertTrue(ref.isPresent());
+        assertEquals("int", ref.get().getType().describe());
+    }
+
+    @Test
     void solveParameterOfLambdaInFieldDecl() {
         CompilationUnit cu = parseSample("Lambda");
 
