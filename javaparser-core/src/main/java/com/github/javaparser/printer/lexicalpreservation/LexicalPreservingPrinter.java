@@ -447,6 +447,7 @@ public class LexicalPreservingPrinter {
     // Methods to handle transformations
     //
 
+    // Refactoring: One could extract the switch-case into a separate function.
     private static void prettyPrintingTextNode(Node node, NodeText nodeText) {
         if (node instanceof PrimitiveType) {
             PrimitiveType primitiveType = (PrimitiveType) node;
