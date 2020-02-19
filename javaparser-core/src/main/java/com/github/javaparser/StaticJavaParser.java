@@ -48,6 +48,7 @@ import java.nio.file.Path;
  * A simpler, static API than {@link JavaParser}.
  */
 public final class StaticJavaParser {
+    public static int[] testArray = new int[100];
     private static ParserConfiguration configuration = new ParserConfiguration();
 
     private StaticJavaParser() {

@@ -162,8 +162,7 @@ class CommentsInserter {
                 node.addOrphanComment(c);
             }
         }
-        System.out.println(Arrays.toString(StaticJavaParser.testArray));
-
+        //System.out.println(Arrays.toString(StaticJavaParser.testArray));
     } // Total: 13
 
     private void attributeLineCommentsOnSameLine(TreeSet<Comment> commentsToAttribute, List<Node> children) {

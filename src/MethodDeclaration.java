@@ -246,7 +246,6 @@ public class MethodDeclaration extends CallableDeclaration<MethodDeclaration> im
                 }
             }
         }
-        System.out.println(Arrays.toString(StaticJavaParser.testArray));
         sb.append(")");
         sb.append(appendThrowsIfRequested(includingThrows));
         //System.out.println(Arrays.toString(StaticJavaParser.testArray));
