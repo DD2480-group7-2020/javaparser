@@ -21,6 +21,7 @@
 
 package com.github.javaparser;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -36,4 +37,28 @@ class GeneratedJavaParserTokenManagerTest {
     void issue1003() throws IOException {
         parseResource(makeFilename("issue1003"));
     }
+
+    @Test
+    void jjMoveStringLiteralDfa7_0Test_KTH() throws IOException {
+        parseResource(makeFilename("issueKTH"));
+        // GeneratedJavaParserTokenManager.jjMoveStringLiteralDfa7_0();
+    }
+
+    @AfterAll
+    public static void afterClass() {
+
+        boolean branchVisited2[] = GeneratedJavaParserTokenManager.branchVisited;
+        System.out.println("Branch Coverage results from function GeneratedJavaParserTokenManager::jjMoveStringLiteralDfa7_0:");
+
+        int coveredBranches = 0;
+        for(boolean b : branchVisited2) {
+            System.out.println(b);
+            if(b)
+                coveredBranches++;
+        }
+        double percentage = (double)coveredBranches/(double)branchVisited2.length;
+        System.out.println("Branch Coverage percentage:" + percentage);
+    }
+
+
 }
