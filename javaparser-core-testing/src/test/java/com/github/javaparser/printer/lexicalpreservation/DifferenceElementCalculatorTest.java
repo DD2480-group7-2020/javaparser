@@ -81,6 +81,8 @@ class DifferenceElementCalculatorTest extends AbstractLexicalPreservingTest {
 						}
 				}
 				System.out.println("Counter: " + counter);
+				//System.out.println("Coverage for Difference Element Calculator " + (counter/55));
+
 		}
 
     @Test

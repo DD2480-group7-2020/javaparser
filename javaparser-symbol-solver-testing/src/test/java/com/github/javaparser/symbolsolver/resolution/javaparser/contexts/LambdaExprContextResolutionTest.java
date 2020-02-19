@@ -73,13 +73,14 @@ class LambdaExprContextResolutionTest extends AbstractResolutionTest {
 		static void AfterAll() {
 				System.out.println("After lambda tests...");
 				int counter = 0;
-				for (int i = 0; i < 55; i++) {
+				for (int i = 0; i < 36; i++) {
 						System.out.println(LambdaExprContext.branching[i]);
 						if (LambdaExprContext.branching[i]) {
 								counter++;
 						}
 				}
 				System.out.println("Counter: " + counter);
+        System.out.println("Coverage for LambdaExprContext " + (counter/36));
 		}
 
     @BeforeEach

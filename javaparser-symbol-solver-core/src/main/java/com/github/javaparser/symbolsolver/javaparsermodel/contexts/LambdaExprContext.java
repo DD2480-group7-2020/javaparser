@@ -74,7 +74,6 @@ public class LambdaExprContext extends AbstractJavaParserContext<LambdaExpr> {
                 if (decl.getName().equals(name)) {
 										branching[2] = true;
                     if (demandParentNode(wrappedNode) instanceof MethodCallExpr) {
-												System.out.println("METH");
 												branching[3] = true;
                         MethodCallExpr methodCallExpr = (MethodCallExpr) demandParentNode(wrappedNode);
                         MethodUsage methodUsage = JavaParserFacade.get(typeSolver).solveMethodAsUsage(methodCallExpr);
@@ -83,7 +82,6 @@ public class LambdaExprContext extends AbstractJavaParserContext<LambdaExpr> {
 
                         // Get the functional method in order for us to resolve it's type arguments properly
                         Optional<MethodUsage> functionalMethodOpt = FunctionalInterfaceLogic.getFunctionalMethod(lambdaType);
-												System.out.println("LAMBDAAA AAAAA");
                         if (functionalMethodOpt.isPresent()){
 														branching[4] = true;
                             MethodUsage functionalMethod = functionalMethodOpt.get();
@@ -96,12 +94,9 @@ public class LambdaExprContext extends AbstractJavaParserContext<LambdaExpr> {
                             // Find the position of this lambda argument
                             boolean found = false;
                             int lambdaParamIndex;
-														System.out.println("LAMBDAAA: " + wrappedNode.getParameters().size());
-														System.out.println("LAMBDAAA: " + wrappedNode.getParameters());
                             for (lambdaParamIndex = 0; lambdaParamIndex < wrappedNode.getParameters().size(); lambdaParamIndex++){
 																branching[5] = true;
                                 if (wrappedNode.getParameter(lambdaParamIndex).getName().getIdentifier().equals(name)){
-																		System.out.println("lolwut" + wrappedNode.getParameter(lambdaParamIndex).getName().getIdentifier());
 																		branching[6] = true;
                                     found = true;
                                     break;
@@ -134,7 +129,6 @@ public class LambdaExprContext extends AbstractJavaParserContext<LambdaExpr> {
                             return Optional.empty();
                         }
                     } else if (demandParentNode(wrappedNode) instanceof VariableDeclarator) {
-												System.out.println("DEC");
 												branching[13] = true;
                         VariableDeclarator variableDeclarator = (VariableDeclarator) demandParentNode(wrappedNode);
                         ResolvedType t = JavaParserFacade.get(typeSolver).convertToUsageVariableType(variableDeclarator);
@@ -185,20 +179,15 @@ public class LambdaExprContext extends AbstractJavaParserContext<LambdaExpr> {
                             throw new UnsupportedOperationException();
                         }
                     } else if (demandParentNode(wrappedNode) instanceof ReturnStmt) {
-												System.out.println("STMT");
 												branching[24] = true;
                         ReturnStmt returnStmt = (ReturnStmt) demandParentNode(wrappedNode);
                         Optional<MethodDeclaration> optDeclaration = returnStmt.findAncestor(MethodDeclaration.class);
                         if (optDeclaration.isPresent()) {
-														System.out.println("SUPER 1" + optDeclaration.get());
 														branching[25] = true;
                             ResolvedType t = JavaParserFacade.get(typeSolver).convertToUsage(optDeclaration.get().asMethodDeclaration().getType());
                             Optional<MethodUsage> functionalMethod = FunctionalInterfaceLogic.getFunctionalMethod(t);
-														System.out.println("SUPER " + t);
-														System.out.println("SUPER " + functionalMethod);
 
                             if (functionalMethod.isPresent()) {
-														System.out.println("SUPER2");
 																branching[26] = true;
                                 ResolvedType lambdaType = functionalMethod.get().getParamType(index);
 
