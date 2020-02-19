@@ -138,16 +138,16 @@ class JavadocParser {
         cleanedLines = cleanedLines.stream().map(l -> l.trim().isEmpty() ? "" : l).collect(Collectors.toList());
         // if the first starts with a space, remove it
         if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
-            // CCN 8  CCN 9
+            // CCN 8  CCN 9 CCN 10
             cleanedLines.set(0, cleanedLines.get(0).substring(1));
         }
         // drop empty lines at the beginning and at the end
         while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
-            // CCN 10 11
+            // CCN 11 12
             cleanedLines = cleanedLines.subList(1, cleanedLines.size());
         }
         while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
-            // CCN 12 13
+            // CCN 13 14
             cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
         }
         return cleanedLines;
