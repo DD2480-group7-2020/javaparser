@@ -25,6 +25,10 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,43 +103,98 @@ class JavadocParser {
         return string;
     }
 
+    // This function is not directly tested... But this get called over 3500 times...
     private static List<String> cleanLines(String content) {
-        String[] lines = content.split(EOL);
-        if (lines.length == 0) {
-            return Collections.emptyList();
-        }
 
-        List<String> cleanedLines = Arrays.stream(lines).map(l -> {
-            int asteriskIndex = startsWithAsterisk(l);
-            if (asteriskIndex == -1) {
-                return l;
+        String filename = "f1coverage.txt";
+
+        FileOutputStream outputStream = null;
+
+        List<String> branchLines = new ArrayList<>();
+
+
+        try {
+            outputStream = new FileOutputStream(filename, true);
+
+            branchLines.add("New test\n");
+
+
+            String[] lines = content.split(EOL);
+            if (lines.length == 0) {
+                branchLines.add("(1)\n");
+                return Collections.emptyList();
             } else {
-                // if a line starts with space followed by an asterisk drop to the asterisk
-                // if there is a space immediately after the asterisk drop it also
-                if (l.length() > (asteriskIndex + 1)) {
+                branchLines.add("(2)\n");
+                List<String> cleanedLines = Arrays.stream(lines).map(l -> {
+                    int asteriskIndex = startsWithAsterisk(l);
+                    if (asteriskIndex == -1) {
+                        branchLines.add("(3)\n");
+                        return l;
+                    } else {
+                        branchLines.add("(4)\n");
+                        // if a line starts with space followed by an asterisk drop to the asterisk
+                        // if there is a space immediately after the asterisk drop it also
+                        if (l.length() > (asteriskIndex + 1)) {
+                            branchLines.add("(4a)\n");
 
-                    char c = l.charAt(asteriskIndex + 1);
-                    if (c == ' ' || c == '\t') {
-                        return l.substring(asteriskIndex + 2);
+                            char c = l.charAt(asteriskIndex + 1);
+                            if (c == ' ' || c == '\t') {
+                                branchLines.add("(4a-a)\n");
+                                return l.substring(asteriskIndex + 2);
+                            }
+                        }
+                        branchLines.add("(4b)\n");
+                        return l.substring(asteriskIndex + 1);
                     }
+                }).collect(Collectors.toList());
+                // lines containing only whitespace are normalized to empty lines
+
+                cleanedLines = cleanedLines.stream().map(l -> {
+                    if (l.trim().isEmpty()) {
+                        branchLines.add("(5)\n");
+                        return "";
+                    } else {
+                        branchLines.add("(6)\n");
+                        return l;
+                    }
+                    //l.trim().isEmpty() ? "" : l
+                }).collect(Collectors.toList());
+                // if the first starts with a space, remove it
+
+                if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
+                    branchLines.add("(7)\n");
+                    cleanedLines.set(0, cleanedLines.get(0).substring(1));
                 }
-                return l.substring(asteriskIndex + 1);
+                // drop empty lines at the beginning and at the end
+                while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
+                    branchLines.add("(8)\n");
+                    cleanedLines = cleanedLines.subList(1, cleanedLines.size());
+                }
+                while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
+                    branchLines.add("(9)\n");
+                    cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
+                }
+                return cleanedLines;
             }
-        }).collect(Collectors.toList());
-        // lines containing only whitespace are normalized to empty lines
-        cleanedLines = cleanedLines.stream().map(l -> l.trim().isEmpty() ? "" : l).collect(Collectors.toList());
-        // if the first starts with a space, remove it
-        if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
-            cleanedLines.set(0, cleanedLines.get(0).substring(1));
+
+
+        } catch (IOException e) {
+
+        } finally {
+            try {
+                String str = "";
+                for (String l : branchLines) {
+                    str += l;
+                }
+                byte[] strToBytes = str.getBytes();
+                outputStream.write(strToBytes);
+
+                outputStream.close();
+            } catch (Exception e) {
+
+            }
         }
-        // drop empty lines at the beginning and at the end
-        while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
-            cleanedLines = cleanedLines.subList(1, cleanedLines.size());
-        }
-        while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
-            cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
-        }
-        return cleanedLines;
+        return null;
     }
 
     // Visible for testing
