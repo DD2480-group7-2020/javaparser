@@ -169,7 +169,6 @@ public class MethodResolutionLogic {
 
     private static boolean isAssignableMatchTypeParametersMatchingQName(ResolvedReferenceType expected, ResolvedReferenceType actual,
                                                                         Map<String, ResolvedType> matchedParameters) {
-
         if (!expected.getQualifiedName().equals(actual.getQualifiedName())) {
             return false;
         }
@@ -258,12 +257,16 @@ public class MethodResolutionLogic {
         }
     }
 
+
     public static boolean isApplicable(MethodUsage method, String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver) {
         if (!method.getName().equals(name)) {
+            //CC = 1
             return false;
-        }
+        } // else
+
         // TODO Consider varargs
         if (method.getNoParams() != argumentsTypes.size()) {
+            //CC = 2
             return false;
         }
         for (int i = 0; i < method.getNoParams(); i++) {
@@ -276,16 +279,19 @@ public class MethodResolutionLogic {
             typeParameters.addAll(method.declaringType().getTypeParameters());
 
             if (expectedType.describe().equals(actualType.describe())) {
+                // CC = 3
                 return true;
-            }
+            } // else
 
             Map<ResolvedTypeParameterDeclaration, ResolvedType> derivedValues = new HashMap<>();
             for (int j = 0; j < method.getParamTypes().size(); j++) {
                 ResolvedParameterDeclaration parameter = method.getDeclaration().getParam(i);
                 ResolvedType parameterType = parameter.getType();
+
                 if (parameter.isVariadic()) {
+                    //CC = 4
                     parameterType = parameterType.asArrayType().getComponentType();
-                }
+                } //else
                 inferTypes(argumentsTypes.get(j), parameterType, derivedValues);
             }
 
@@ -296,55 +302,69 @@ public class MethodResolutionLogic {
 
             for (ResolvedTypeParameterDeclaration tp : typeParameters) {
                 if (tp.getBounds().isEmpty()) {
+                    //CC = 5
                     //expectedType = expectedType.replaceTypeVariables(tp.getName(), new ReferenceTypeUsageImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                     expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.extendsBound(new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver)));
                 } else if (tp.getBounds().size() == 1) {
+                    //CC = 6
                     ResolvedTypeParameterDeclaration.Bound bound = tp.getBounds().get(0);
                     if (bound.isExtends()) {
+                        //CC = 7
                         //expectedType = expectedType.replaceTypeVariables(tp.getName(), bound.getType());
                         expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.extendsBound(bound.getType()));
                     } else {
+                        //CC = 8
                         //expectedType = expectedType.replaceTypeVariables(tp.getName(), new ReferenceTypeUsageImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                         expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.superBound(bound.getType()));
                     }
                 } else {
+                    //CC = 9
                     throw new UnsupportedOperationException();
                 }
             }
             ResolvedType expectedType2 = expectedTypeWithoutSubstitutions;
             for (ResolvedTypeParameterDeclaration tp : typeParameters) {
                 if (tp.getBounds().isEmpty()) {
+                    //CC = 10
                     expectedType2 = expectedType2.replaceTypeVariables(tp, new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                 } else if (tp.getBounds().size() == 1) {
+                    //CC = 11
                     ResolvedTypeParameterDeclaration.Bound bound = tp.getBounds().get(0);
                     if (bound.isExtends()) {
+                        //CC = 12
                         expectedType2 = expectedType2.replaceTypeVariables(tp, bound.getType());
                     } else {
+                        //CC = 13
                         expectedType2 = expectedType2.replaceTypeVariables(tp, new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                     }
                 } else {
+                    //CC = 14
                     throw new UnsupportedOperationException();
                 }
             }
+
             if (!expectedType.isAssignableBy(actualType)
                     && !expectedType2.isAssignableBy(actualType)
                     && !expectedTypeWithInference.isAssignableBy(actualType)
                     && !expectedTypeWithoutSubstitutions.isAssignableBy(actualType)) {
                 return false;
             }
+
+
         }
+        //CC = 19
         return true;
     }
-    
+
     /**
      * Filters by given function {@param keyExtractor} using a stateful filter mechanism.
-     * 
+     *
      * <pre>
      *      persons.stream().filter(distinctByKey(Person::getName))
      * </pre>
-     * 
+     *
      * The example above would return a distinct list of persons containing only one person per name.
-     * 
+     *
      */
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
@@ -365,18 +385,18 @@ public class MethodResolutionLogic {
 
     public static SymbolReference<ResolvedMethodDeclaration> findMostApplicable(List<ResolvedMethodDeclaration> methods,
                                                                                 String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver, boolean wildcardTolerance) {
-        
+
         List<ResolvedMethodDeclaration> methodsWithMatchingName = methods.stream()
                 .filter(m -> m.getName().equals(name))
                 .collect(Collectors.toList());
-        
+
         List<ResolvedMethodDeclaration> applicableMethods = methodsWithMatchingName.stream()
                 // Filters out duplicate ResolvedMethodDeclaration by their signature.
-                .filter(distinctByKey(ResolvedMethodDeclaration::getQualifiedSignature)) 
+                .filter(distinctByKey(ResolvedMethodDeclaration::getQualifiedSignature))
                 // Checks if ResolvedMethodDeclaration is applicable to argumentsTypes.
                 .filter((m) -> isApplicable(m, name, argumentsTypes, typeSolver, wildcardTolerance))
                 .collect(Collectors.toList());
-        
+
         if (applicableMethods.isEmpty()) {
             return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
         }

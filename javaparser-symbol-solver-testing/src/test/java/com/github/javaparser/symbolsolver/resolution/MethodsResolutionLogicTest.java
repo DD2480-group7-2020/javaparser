@@ -21,8 +21,10 @@
 
 package com.github.javaparser.symbolsolver.resolution;
 
+import com.github.javaparser.GeneratedJavaParserTokenManager;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionFactory;
@@ -31,6 +33,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.symbolsolver.utils.LeanParserConfiguration;
 import com.google.common.collect.ImmutableList;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -85,5 +90,24 @@ class MethodsResolutionLogicTest extends AbstractResolutionTest {
         MethodUsage mu = constructorDeclaration.getAllMethods().stream().filter(m -> m.getDeclaration().getSignature().equals("isThrows(java.lang.Class<? extends java.lang.Throwable>)")).findFirst().get();
 
         assertEquals(true, MethodResolutionLogic.isApplicable(mu, "isThrows", ImmutableList.of(classOfRuntimeType), typeSolver));
+    }
+
+    @Test
+    void isApplicableTest_KTH() {
+        JavaParserClassDeclaration constructorDeclaration = (JavaParserClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.body.ConstructorDeclaration");
+
+        ResolvedReferenceType stringType = (ResolvedReferenceType) ReflectionFactory.typeUsageFor(String.class, typeSolver);
+        ResolvedReferenceType rawClassType = (ResolvedReferenceType) ReflectionFactory.typeUsageFor(Class.class, typeSolver);
+        assertEquals(true, rawClassType.isRawType());
+        ResolvedReferenceType classOfStringType = (ResolvedReferenceType) rawClassType.replaceTypeVariables(rawClassType.getTypeDeclaration().getTypeParameters().get(0), stringType);
+
+        MethodUsage mu = constructorDeclaration.getAllMethods().stream().filter(m -> m.getDeclaration().getSignature().equals("isThrows(java.lang.Class<? extends java.lang.Throwable>)")).findFirst().get();
+        assertEquals(false, MethodResolutionLogic.isApplicable(mu, "isThrows", ImmutableList.of(classOfStringType), typeSolver));
+        assertEquals(false, MethodResolutionLogic.isApplicable(mu, "testName", ImmutableList.of(classOfStringType), typeSolver));
+        assertEquals(false, MethodResolutionLogic.isApplicable(mu, "isThrows", ImmutableList.of(), typeSolver));
+        ResolvedType expectedType = mu.getParamType(0);
+        assertEquals(true, MethodResolutionLogic.isApplicable(mu, "isThrows", ImmutableList.of(expectedType), typeSolver));
+
+        System.out.println("Custom tests finished!");
     }
 }
