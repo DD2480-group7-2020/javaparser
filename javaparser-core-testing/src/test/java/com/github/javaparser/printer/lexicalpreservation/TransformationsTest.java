@@ -129,6 +129,17 @@ class TransformationsTest extends  AbstractLexicalPreservingTest {
     }
 
     @Test
+    void exempleParamMissingBranchCoverage() throws IOException {
+        considerExample("Example_param1_original");
+        MethodDeclaration md = cu.getClassByName("A").get().getMember(0).asMethodDeclaration();
+        md.addParameter("byte", "p1");
+        md.addParameter("short", "p2");
+        md.addParameter("long","p3");
+        md.addParameter("float", "p4");
+        assertTransformed("Example_paramMy", cu);
+    }
+
+    @Test
     void exampleParam1() throws IOException {
         considerExample("Example_param1_original");
         MethodDeclaration md = cu.getClassByName("A").get().getMember(0).asMethodDeclaration();
