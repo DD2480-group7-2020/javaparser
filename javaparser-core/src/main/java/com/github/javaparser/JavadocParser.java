@@ -141,10 +141,14 @@ class JavadocParser {
                             if (c == ' ' || c == '\t') {
                                 branchLines.add("(4a-a)\n");
                                 return l.substring(asteriskIndex + 2);
+                            } else {
+                                branchLines.add("(4a-b)\n");
                             }
                         }
-                        branchLines.add("(4b)\n");
-                        return l.substring(asteriskIndex + 1);
+                        else {
+                            branchLines.add("(4b)\n");
+                            return l.substring(asteriskIndex + 1);
+                        }
                     }
                 }).collect(Collectors.toList());
                 // lines containing only whitespace are normalized to empty lines
@@ -164,20 +168,21 @@ class JavadocParser {
                 if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
                     branchLines.add("(7)\n");
                     cleanedLines.set(0, cleanedLines.get(0).substring(1));
-                }
-                // drop empty lines at the beginning and at the end
-                while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
+                } else {
                     branchLines.add("(8)\n");
-                    cleanedLines = cleanedLines.subList(1, cleanedLines.size());
+                    // drop empty lines at the beginning and at the end
+                    while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
+                        branchLines.add("(9)\n");
+                        cleanedLines = cleanedLines.subList(1, cleanedLines.size());
+                    }
+                    while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
+                        branchLines.add("(10)\n");
+                        cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
+                    }
+                    return cleanedLines;
                 }
-                while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
-                    branchLines.add("(9)\n");
-                    cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
-                }
-                return cleanedLines;
             }
-
-
+            
         } catch (IOException e) {
 
         } finally {
