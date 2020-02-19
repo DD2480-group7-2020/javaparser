@@ -38,14 +38,20 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.symbolsolver.utils.LeanParserConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Arrays;
+import java.lang.System.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.github.javaparser.symbolsolver.javaparsermodel.contexts.LambdaExprContext;
 
 /**
  * @author Malte Langkabel
@@ -53,6 +59,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LambdaExprContextResolutionTest extends AbstractResolutionTest {
 
     private TypeSolver typeSolver;
+
+		@BeforeAll
+		static void BeforeAll() {
+				Arrays.fill(LambdaExprContext.branching, false);
+				System.out.println("Hello cruel lambda world!");
+				for (int i = 0; i < 100; i++) {
+						System.out.println(LambdaExprContext.branching[i]);
+				}
+		}
+
+		@AfterAll
+		static void AfterAll() {
+				System.out.println("After lambda tests...");
+				int counter = 0;
+				for (int i = 0; i < 55; i++) {
+						System.out.println(LambdaExprContext.branching[i]);
+						if (LambdaExprContext.branching[i]) {
+								counter++;
+						}
+				}
+				System.out.println("Counter: " + counter);
+		}
 
     @BeforeEach
     void setup() {

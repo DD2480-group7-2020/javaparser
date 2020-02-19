@@ -37,8 +37,13 @@ import com.github.javaparser.printer.lexicalpreservation.changes.*;
 import com.github.javaparser.utils.Utils;
 
 import java.util.*;
+import java.lang.System.*;
+
+import com.github.javaparser.printer.*;
 
 class LexicalDifferenceCalculator {
+
+		public static boolean[] branching = new boolean[100];
 
     /**
      * The ConcreteSyntaxModel represents the general format. This model is a calculated version of the ConcreteSyntaxModel,
@@ -156,20 +161,33 @@ class LexicalDifferenceCalculator {
     }
 
     private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
+				//System.out.println("Hello there!");
         if (csm instanceof CsmSequence) {
+						branching[0] = true;
             CsmSequence csmSequence = (CsmSequence) csm;
             csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
         } else if (csm instanceof CsmComment) {
+						branching[1] = true;
             // nothing to do
         } else if (csm instanceof CsmSingleReference) {
+						branching[2] = true;
             CsmSingleReference csmSingleReference = (CsmSingleReference)csm;
             Node child;
-            if (change instanceof PropertyChange && ((PropertyChange)change).getProperty() == csmSingleReference.getProperty()) {
-                child = (Node)((PropertyChange)change).getNewValue();
+            if (change instanceof PropertyChange /*&& ((PropertyChange)change).getProperty() == csmSingleReference.getProperty()*/) {
+								branching[3] = true;
+								if (((PropertyChange)change).getProperty() == csmSingleReference.getProperty()) {
+										branching[4] = true;
+				child = (Node)((PropertyChange)change).getNewValue();
+								} else {
+										branching[5] = true;
+                    child = csmSingleReference.getProperty().getValueAsSingleReference(node);
+								}
             } else {
+								branching[6] = true;
                 child = csmSingleReference.getProperty().getValueAsSingleReference(node);
             }
             if (child != null) {
+								branching[7] = true;
                 // fix issue #2374
                 // Add node comment if needed (it's not very elegant but it works)
                 // We need to be sure that the node is an ExpressionStmt because we can meet
@@ -179,110 +197,170 @@ class LexicalDifferenceCalculator {
                 // In this case keyworld [class] is considered as a token and [A] is a child element
                 // So if we don't care that the node is an ExpressionStmt we could try to generate a wrong definition
                 // like this [class // This is my class, with my comment A {}]
-                if (node.getComment().isPresent() && node instanceof ExpressionStmt) {
-                    elements.add(new CsmChild(node.getComment().get()));
-                    elements.add(new CsmToken(Kind.EOF.getKind(), Utils.EOL));
-                }
+                if (node.getComment().isPresent() /*&& node instanceof ExpressionStmt*/) {
+										branching[8] = true;
+										if (node instanceof ExpressionStmt) {
+												branching[9] = true;
+				elements.add(new CsmChild(node.getComment().get()));
+				elements.add(new CsmToken(Kind.EOF.getKind(), Utils.EOL));
+										} else {
+												branching[10] = true;
+										}
+                } else {
+										branching[11] = true;
+								}
                 elements.add(new CsmChild(child));
-            }
+            } else {
+								branching[12] = true;
+						}
         } else if (csm instanceof CsmNone) {
+						branching[13] = true;
             // nothing to do
         } else if (csm instanceof CsmToken) {
+						branching[14] = true;
             elements.add(csm);
         } else if (csm instanceof CsmOrphanCommentsEnding) {
+						branching[15] = true;
             // nothing to do
         } else if (csm instanceof CsmList) {
+						branching[16] = true;
             CsmList csmList = (CsmList) csm;
             if (csmList.getProperty().isAboutNodes()) {
+								branching[17] = true;
                 Object rawValue = change.getValue(csmList.getProperty(), node);
                 NodeList<?> nodeList;
                 if (rawValue instanceof Optional) {
+										branching[18] = true;
                     Optional<?> optional = (Optional<?>)rawValue;
                     if (optional.isPresent()) {
+												branching[19] = true;
                         if (!(optional.get() instanceof NodeList)) {
-                            throw new IllegalStateException("Expected NodeList, found " + optional.get().getClass().getCanonicalName());
-                        }
+														branching[20] = true;
+                        }	else {
+														branching[21] = true;
+												}
                         nodeList = (NodeList<?>) optional.get();
                     } else {
+												branching[22] = true;
                         nodeList = new NodeList<>();
                     }
                 } else {
+										branching[23] = true;
                     if (!(rawValue instanceof NodeList)) {
-                        throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
-                    }
+												branching[24] = true;
+                    } else {
+												branching[25] = true;
+										}
                     nodeList = (NodeList<?>) rawValue;
                 }
                 if (!nodeList.isEmpty()) {
+										branching[26] = true;
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
                     for (int i = 0; i < nodeList.size(); i++) {
+												branching[27] = true;
                         if (i != 0) {
+														branching[28] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
-                        }
+                        } else {
+														branching[29] = true;
+
+												}
                         elements.add(new CsmChild(nodeList.get(i)));
                         if (i != (nodeList.size() - 1)) {
+														branching[30] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
-                        }
+                        } else {
+														branching[31] = true;
+												}
 
                     }
                     calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
                 }
             } else {
+								branching[32] = true;
                 Collection<?> collection = (Collection<?>) change.getValue(csmList.getProperty(), node);
                 if (!collection.isEmpty()) {
+										branching[33] = true;
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
 
                     boolean first = true;
                     for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
+												branching[34] = true;
                         if (!first) {
+														branching[35] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
-                        }
+                        } else {
+														branching[36] = true;
+												}
                         Object value = it.next();
                         if (value instanceof Modifier) {
+														branching[37] = true;
                             Modifier modifier = (Modifier)value;
                             elements.add(new CsmToken(toToken(modifier)));
                         } else {
+														branching[38] = true;
                             throw new UnsupportedOperationException(it.next().getClass().getSimpleName());
                         }
                         if (it.hasNext()) {
+														branching[39] = true;
                             calculatedSyntaxModelForNode(csmList.getSeparatorPost(), node, elements, change);
-                        }
+                        } else {
+														branching[40] = true;
+												}
                         first = false;
                     }
                     calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
-                }
+                } else {
+										branching[41] = true;
+								}
             }
         } else if (csm instanceof CsmConditional) {
+						branching[42] = true;
             CsmConditional csmConditional = (CsmConditional) csm;
             boolean satisfied = change.evaluate(csmConditional, node);
             if (satisfied) {
+								branching[43] = true;
                 calculatedSyntaxModelForNode(csmConditional.getThenElement(), node, elements, change);
             } else {
+								branching[44] = true;
                 calculatedSyntaxModelForNode(csmConditional.getElseElement(), node, elements, change);
             }
         } else if (csm instanceof CsmIndent) {
+						branching[45] = true;
             elements.add(csm);
         } else if (csm instanceof CsmUnindent) {
+						branching[46] = true;
             elements.add(csm);
         } else if (csm instanceof CsmAttribute) {
+						branching[47] = true;
             CsmAttribute csmAttribute = (CsmAttribute) csm;
             Object value = change.getValue(csmAttribute.getProperty(), node);
             String text = value.toString();
             if (value instanceof Printable) {
+								branching[48] = true;
                 text = ((Printable) value).asString();
-            }
+            } else {
+							branching[49] = true;
+						}
             elements.add(new CsmToken(csmAttribute.getTokenType(node, value.toString(), text), text));
-        } else if ((csm instanceof CsmString) && (node instanceof StringLiteralExpr)) {
-            elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL,
+        } else if ((csm instanceof CsmString) /*&& (node instanceof StringLiteralExpr)*/) {
+						branching[50] = true;
+						if (node instanceof StringLiteralExpr) {
+								branching[51] = true;
+                elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL,
                     "\"" + ((StringLiteralExpr) node).getValue() + "\""));
+						}
         } else if (csm instanceof CsmMix) {
+						branching[52] = true;
             CsmMix csmMix = (CsmMix)csm;
             List<CsmElement> mixElements = new LinkedList<>();
             csmMix.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, mixElements, change));
             elements.add(new CsmMix(mixElements));
         } else if (csm instanceof CsmChild) {
+						branching[53] = true;
             elements.add(csm);
         } else {
-            throw new UnsupportedOperationException(csm.getClass().getSimpleName()+ " " + csm);
+						branching[54] = true;
         }
     }
 
