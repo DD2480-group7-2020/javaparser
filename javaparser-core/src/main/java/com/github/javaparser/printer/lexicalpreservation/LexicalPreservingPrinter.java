@@ -456,74 +456,73 @@ public class LexicalPreservingPrinter {
 
         try{
             branchLines.add("New test\n");
+            branchLines.add("(1)\n");
             outputStream = new FileOutputStream(filename, true);
 
             if (node instanceof PrimitiveType) {
-                branchLines.add("(1)\n");
+                branchLines.add("(2)\n");
                 PrimitiveType primitiveType = (PrimitiveType) node;
                 switch (primitiveType.getType()) {
-
                     case BOOLEAN:
-                        branchLines.add("(1a-a)\n");
+                        branchLines.add("(2a)\n");
                         nodeText.addToken(BOOLEAN, node.toString());
                         break;
                     case CHAR:
-                        branchLines.add("(1a-b)\n");
+                        branchLines.add("(2b)\n");
                         nodeText.addToken(CHAR, node.toString());
                         break;
                     case BYTE:
-                        branchLines.add("(1a-c)\n");
+                        branchLines.add("(2c)\n");
                         nodeText.addToken(BYTE, node.toString());
                         break;
                     case SHORT:
-                        branchLines.add("(1a-d)\n");
+                        branchLines.add("(2d)\n");
                         nodeText.addToken(SHORT, node.toString());
                         break;
                     case INT:
-                        branchLines.add("(1a-e)\n");
+                        branchLines.add("(2e)\n");
                         nodeText.addToken(INT, node.toString());
                         break;
                     case LONG:
-                        branchLines.add("(1a-f)\n");
+                        branchLines.add("(2f)\n");
                         nodeText.addToken(LONG, node.toString());
                         break;
                     case FLOAT:
-                        branchLines.add("(1a-g)\n");
+                        branchLines.add("(2g)\n");
                         nodeText.addToken(FLOAT, node.toString());
                         break;
                     case DOUBLE:
-                        branchLines.add("(1a-h)\n");
+                        branchLines.add("(2h)\n");
                         nodeText.addToken(DOUBLE, node.toString());
                         break;
                     default:
-                        branchLines.add("(1a-i)\n");
+                        branchLines.add("(2i)\n");
                         throw new IllegalArgumentException();
                 }
                 return;
             }
             if (node instanceof JavadocComment) {
-                branchLines.add("(2)\n");
+                branchLines.add("(3)\n");
                 nodeText.addToken(JAVADOC_COMMENT, "/**" + ((JavadocComment) node).getContent() + "*/");
                 return;
             }
             if (node instanceof BlockComment) {
-                branchLines.add("(3)\n");
+                branchLines.add("(4)\n");
                 nodeText.addToken(MULTI_LINE_COMMENT, "/*" + ((BlockComment) node).getContent() + "*/");
                 return;
             }
             if (node instanceof LineComment) {
-                branchLines.add("(4)\n");
+                branchLines.add("(5)\n");
                 nodeText.addToken(SINGLE_LINE_COMMENT, "//" + ((LineComment) node).getContent());
                 return;
             }
             if (node instanceof Modifier) {
-                branchLines.add("(5)\n");
+                branchLines.add("(6)\n");
                 Modifier modifier = (Modifier) node;
                 nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
                 return;
             }
-
-            branchLines.add("(6)\n");
+            
             interpret(node, ConcreteSyntaxModel.forClass(node.getClass()), nodeText);
 
         } catch (IOException e) {
