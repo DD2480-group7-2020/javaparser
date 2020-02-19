@@ -500,31 +500,39 @@ public class LexicalPreservingPrinter {
                         throw new IllegalArgumentException();
                 }
                 return;
-            }
-            if (node instanceof JavadocComment) {
+            } else {
                 branchLines.add("(3)\n");
-                nodeText.addToken(JAVADOC_COMMENT, "/**" + ((JavadocComment) node).getContent() + "*/");
-                return;
+                if (node instanceof JavadocComment) {
+                    branchLines.add("(4)\n");
+                    nodeText.addToken(JAVADOC_COMMENT, "/**" + ((JavadocComment) node).getContent() + "*/");
+                    return;
+                } else {
+                    branchLines.add("(5)\n");
+                    if (node instanceof BlockComment) {
+                        branchLines.add("(6)\n");
+                        nodeText.addToken(MULTI_LINE_COMMENT, "/*" + ((BlockComment) node).getContent() + "*/");
+                        return;
+                    } else {
+                        branchLines.add("(7)\n");
+                        if (node instanceof LineComment) {
+                            branchLines.add("(8)\n");
+                            nodeText.addToken(SINGLE_LINE_COMMENT, "//" + ((LineComment) node).getContent());
+                            return;
+                        } else {
+                            branchLines.add("(9)\n");
+                            if (node instanceof Modifier) {
+                                branchLines.add("(10)\n");
+                                Modifier modifier = (Modifier) node;
+                                nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
+                                return;
+                            } else {
+                                branchLines.add("(11)\n");
+                                interpret(node, ConcreteSyntaxModel.forClass(node.getClass()), nodeText);
+                            }
+                        }   
+                    }
+                }
             }
-            if (node instanceof BlockComment) {
-                branchLines.add("(4)\n");
-                nodeText.addToken(MULTI_LINE_COMMENT, "/*" + ((BlockComment) node).getContent() + "*/");
-                return;
-            }
-            if (node instanceof LineComment) {
-                branchLines.add("(5)\n");
-                nodeText.addToken(SINGLE_LINE_COMMENT, "//" + ((LineComment) node).getContent());
-                return;
-            }
-            if (node instanceof Modifier) {
-                branchLines.add("(6)\n");
-                Modifier modifier = (Modifier) node;
-                nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
-                return;
-            }
-            
-            interpret(node, ConcreteSyntaxModel.forClass(node.getClass()), nodeText);
-
         } catch (IOException e) {
 
         } finally {
