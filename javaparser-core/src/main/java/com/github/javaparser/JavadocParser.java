@@ -99,23 +99,34 @@ class JavadocParser {
         return string;
     }
 
+    /*
+    * LIZARD CCN 14
+    * COUNT BY HAND 13
+    * The function got 31 NLOC (excluding comments).
+    * The function takes a string and removes all spaces before and removes asterisk and newline.
+    * The function is private and there is no comment that describe the function. But some of the if statements are documented.
+    * */
     private static List<String> cleanLines(String content) {
+        // CCN 1
         String[] lines = content.split(EOL);
         if (lines.length == 0) {
+            // CCN 2
             return Collections.emptyList();
         }
 
         List<String> cleanedLines = Arrays.stream(lines).map(l -> {
             int asteriskIndex = startsWithAsterisk(l);
             if (asteriskIndex == -1) {
+                // CCN 3
                 return l;
             } else {
                 // if a line starts with space followed by an asterisk drop to the asterisk
                 // if there is a space immediately after the asterisk drop it also
                 if (l.length() > (asteriskIndex + 1)) {
-
+                    // CCN 4
                     char c = l.charAt(asteriskIndex + 1);
                     if (c == ' ' || c == '\t') {
+                        // CCN 5 CCN 6
                         return l.substring(asteriskIndex + 2);
                     }
                 }
@@ -123,16 +134,20 @@ class JavadocParser {
             }
         }).collect(Collectors.toList());
         // lines containing only whitespace are normalized to empty lines
+        // CCN 7
         cleanedLines = cleanedLines.stream().map(l -> l.trim().isEmpty() ? "" : l).collect(Collectors.toList());
         // if the first starts with a space, remove it
         if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
+            // CCN 8  CCN 9
             cleanedLines.set(0, cleanedLines.get(0).substring(1));
         }
         // drop empty lines at the beginning and at the end
         while (cleanedLines.size() > 0 && cleanedLines.get(0).trim().isEmpty()) {
+            // CCN 10 11
             cleanedLines = cleanedLines.subList(1, cleanedLines.size());
         }
         while (cleanedLines.size() > 0 && cleanedLines.get(cleanedLines.size() - 1).trim().isEmpty()) {
+            // CCN 12 13
             cleanedLines = cleanedLines.subList(0, cleanedLines.size() - 1);
         }
         return cleanedLines;

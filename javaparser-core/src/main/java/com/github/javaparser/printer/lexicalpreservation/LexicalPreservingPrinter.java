@@ -447,32 +447,50 @@ public class LexicalPreservingPrinter {
     // Methods to handle transformations
     //
 
+    /*
+    * Lizard: 14 CCN
+    * By hand: 14 CCN
+    * The function got 51 NLOC (excluding comments) and what it does it make the Node object printable.
+    * There is a 9 switch-case statement that makes the function relatively high in CC.
+    * There is no documentation about the function but it's easy to understand what it does. The branches are small.
+    * */
+
     private static void prettyPrintingTextNode(Node node, NodeText nodeText) {
+        // CCN 1
         if (node instanceof PrimitiveType) {
+            // CCN 2
             PrimitiveType primitiveType = (PrimitiveType) node;
             switch (primitiveType.getType()) {
                 case BOOLEAN:
+                    // CCN 3
                     nodeText.addToken(BOOLEAN, node.toString());
                     break;
                 case CHAR:
+                    // CCN 4
                     nodeText.addToken(CHAR, node.toString());
                     break;
                 case BYTE:
+                    // CCN 5
                     nodeText.addToken(BYTE, node.toString());
                     break;
                 case SHORT:
+                    // CCN 6
                     nodeText.addToken(SHORT, node.toString());
                     break;
                 case INT:
+                    // CCN 7
                     nodeText.addToken(INT, node.toString());
                     break;
                 case LONG:
+                    // CCN 8
                     nodeText.addToken(LONG, node.toString());
                     break;
                 case FLOAT:
+                    // CCN 9
                     nodeText.addToken(FLOAT, node.toString());
                     break;
                 case DOUBLE:
+                    // CCN 10
                     nodeText.addToken(DOUBLE, node.toString());
                     break;
                 default:
@@ -481,18 +499,22 @@ public class LexicalPreservingPrinter {
             return;
         }
         if (node instanceof JavadocComment) {
+            // CCN 11
             nodeText.addToken(JAVADOC_COMMENT, "/**" + ((JavadocComment) node).getContent() + "*/");
             return;
         }
         if (node instanceof BlockComment) {
+            // CCN 12
             nodeText.addToken(MULTI_LINE_COMMENT, "/*" + ((BlockComment) node).getContent() + "*/");
             return;
         }
         if (node instanceof LineComment) {
+            // CCN 13
             nodeText.addToken(SINGLE_LINE_COMMENT, "//" + ((LineComment) node).getContent());
             return;
         }
         if (node instanceof Modifier) {
+            // CCN 14
             Modifier modifier = (Modifier) node;
             nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
             return;
