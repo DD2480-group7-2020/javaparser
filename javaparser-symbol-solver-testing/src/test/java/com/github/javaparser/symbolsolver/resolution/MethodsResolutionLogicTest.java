@@ -110,4 +110,36 @@ class MethodsResolutionLogicTest extends AbstractResolutionTest {
 
         System.out.println("Custom tests finished!");
     }
+    
+    @AfterAll
+    public static void afterClass() {
+        boolean branchVisited1[] = MethodResolutionLogic.branchVisited;
+
+        System.out.println("Branch Coverage results from function MethodsResolutionLogic::isApplicable");
+
+        int coveredBranches = 0;
+
+        for(boolean b : branchVisited1) {
+            System.out.println(b);
+            if(b)
+                coveredBranches++;
+        }
+
+        double percentage = (double)coveredBranches/(double)branchVisited1.length;
+
+        System.out.println("Branch Coverage percentage:" + percentage);
+
+        boolean branchVisited2[] = GeneratedJavaParserTokenManager.branchVisited;
+        System.out.println("Branch Coverage results from function GeneratedJavaParserTokenManager::jjMoveStringLiteralDfa7_0:");
+
+        coveredBranches = 0;
+        for(boolean b : branchVisited2) {
+            System.out.println(b);
+            if(b)
+                coveredBranches++;
+        }
+        percentage = (double)coveredBranches/(double)branchVisited2.length;
+        System.out.println("Branch Coverage percentage:" + percentage);
+    }
+
 }
