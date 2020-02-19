@@ -45,7 +45,8 @@ import java.util.stream.IntStream;
  *
  * @author ThLeu
  */
-final class RemovedGroup implements Iterable<Removed> {
+//public for testsing purposes
+public class RemovedGroup implements Iterable<Removed> {
 
     private final Integer firstElementIndex;
     private final List<Removed> removedList;

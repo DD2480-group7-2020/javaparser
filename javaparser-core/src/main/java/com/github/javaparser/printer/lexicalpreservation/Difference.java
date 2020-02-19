@@ -25,6 +25,15 @@ import static com.github.javaparser.GeneratedJavaParserConstants.*;
 
 import java.util.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.lang.String;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
+
 import com.github.javaparser.GeneratedJavaParserConstants;
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.JavaToken.Kind;
@@ -49,6 +58,12 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalDifferenceCalcul
  */
 public class Difference {
 
+    public static int n = 23;
+    public static boolean[] cov = new boolean[n];
+
+    public static int n2 = 23;
+    public static boolean[] cov2 = new boolean[n];
+
     public static final int STANDARD_INDENTATION_SIZE = 4;
 
     private final NodeText nodeText;
@@ -56,7 +71,8 @@ public class Difference {
 
     private final List<DifferenceElement> diffElements;
     private final List<TextElement> originalElements;
-    private int originalIndex = 0;
+    //public for testing purposes
+    int originalIndex = 0;
     private int diffIndex = 0;
 
     private final List<TokenTextElement> indentation;
@@ -73,6 +89,17 @@ public class Difference {
         this.originalElements = nodeText.getElements();
 
         this.indentation = LexicalPreservingPrinter.findIndentation(node);
+    }
+
+    //dummy constructor for testing
+    Difference() {
+        
+        this.nodeText = null;
+        this.node = null;
+        this.diffElements = null;
+        this.originalElements = new ArrayList<TextElement>();
+
+        this.indentation = null;
     }
 
     private List<TextElement> processIndentation(List<TokenTextElement> indentation, List<TextElement> prevElements) {
@@ -369,35 +396,74 @@ public class Difference {
         }
         return removedElementsMap;
     }
+    /*
+    Cyclomatic Complexity:
+    1 1 3 2 2 5 (9 6)
+    At total 29, same as lizard output
+    These numbers are contributions to cyclomatic complexity
+    wrt their branches but in reversed order. For example 4th number 2
+    means that 4th last branch else if (removed.isPrimitiveType()) increases
+    cyclomatic complexity by 2. Note that last 2 numbers are for the first if.
+    They are seperated branches inside that if because its too big to count.
+    Also note that total cyclomatic complexity is diferent from covered branches
+    because there are compound statements.
 
-    private void applyRemovedDiffElement(RemovedGroup removedGroup, Removed removed, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
+    Refactoring:
+    Most of the complexity comes from compound statements. Since these statements
+    arent modifying anything(they are mostly booleans or getters) actual complexity
+    is lower. However though lot of branches and conditions makes hard to understand 
+    code. There are 7 branches function can go and other than first if they are relatively
+    small. So isolationg first if to a function with same parameters would be a nice choice.
+    And since half of the complexity comes from that branch its also a good balance. 
+    
+    */
+    // public for testing purposes
+    void applyRemovedDiffElement(RemovedGroup removedGroup, Removed removed, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
+       cov[0] = true;
         if (removed.isChild() && originalElementIsChild) {
+            cov[1] = true;
             ChildTextElement originalElementChild = (ChildTextElement) originalElement;
             if (originalElementChild.isComment()) {
+                cov[2] = true;
                 // We expected to remove a proper node but we found a comment in between.
                 // If the comment is associated to the node we want to remove we remove it as well, otherwise we keep it
                 Comment comment = (Comment) originalElementChild.getChild();
                 if (!comment.isOrphan() && comment.getCommentedNode().isPresent() && comment.getCommentedNode().get().equals(removed.getChild())) {
+                    cov[3] = true;
                     nodeText.removeElement(originalIndex);
                 } else {
+                    cov[4] = true;
                     originalIndex++;
                 }
             } else {
+                cov[5] = true;
                 nodeText.removeElement(originalIndex);
 
                 if ((diffIndex + 1 >= diffElements.size() || !(diffElements.get(diffIndex + 1) instanceof Added))
                         && !removedGroup.isACompleteLine()) {
+                            cov[6] = true;
                     originalIndex = considerEnforcingIndentation(nodeText, originalIndex);
+                } else {
+                    cov[7] = true;
                 }
                 // If in front we have one space and before also we had space let's drop one space
                 if (originalElements.size() > originalIndex && originalIndex > 0) {
+                    cov[8] = true;
                     if (originalElements.get(originalIndex).isWhiteSpace()
                             && originalElements.get(originalIndex - 1).isWhiteSpace()) {
+                                cov[9] = true;
                         // However we do not want to do that when we are about to adding or removing elements
                         if ((diffIndex + 1) == diffElements.size() || (diffElements.get(diffIndex + 1) instanceof Kept)) {
+                            cov[10] = true;
                             originalElements.remove(originalIndex--);
+                        } else {
+                            cov[11] = true;
                         }
+                    } else {
+                        cov[12] = true;
                     }
+                } else {
+                    cov[13] = true;
                 }
 
                 diffIndex++;
@@ -408,26 +474,72 @@ public class Difference {
                         // element always has the current operating system's EOL as type
                         || (((TokenTextElement) originalElement).getToken().getCategory().isEndOfLine()
                                 && removed.isNewLine()))) {
+            cov[14] = true;
             nodeText.removeElement(originalIndex);
             diffIndex++;
         } else if (originalElementIsToken && originalElement.isWhiteSpaceOrComment()) {
+            cov[15] = true;
             originalIndex++;
         } else if (removed.isPrimitiveType()) {
+            cov[16] = true;
             if (originalElement.isPrimitive()) {
+                cov[17] = true;
                 nodeText.removeElement(originalIndex);
                 diffIndex++;
             } else {
+                cov[18] = true;
                 throw new UnsupportedOperationException("removed " + removed.getElement() + " vs " + originalElement);
             }
         } else if (removed.isWhiteSpace() || removed.getElement() instanceof CsmIndent || removed.getElement() instanceof CsmUnindent) {
+            cov[19] = true;
             diffIndex++;
+            //diffIndex--;
+            System.out.println("??????????????????????????????????????????????????????????");
+            System.out.println("??????????????????????????????????????????????????????????");
+            System.out.println("??????????????????????????????????????????????????????????");
+            System.out.println("??????????????????????????????????????????????????????????");
         } else if (originalElement.isWhiteSpace()) {
+            cov[20] = true;
             originalIndex++;
+            
+
+            //originalIndex--;
         } else {
+            cov[21] = true;
             throw new UnsupportedOperationException("removed " + removed.getElement() + " vs " + originalElement);
         }
+        cov[22] = true;
+        
+        saveToFile();
 
         cleanTheLineOfLeftOverSpace(removedGroup, removed);
+    }
+
+    public void saveToFile() {
+        int cnt = 0;
+        for (int i = 0; i < n; i++) {
+            if(cov[i] == true) {
+                cnt++;
+            }     
+        }
+
+        System.out.println("=========================================");
+        System.out.println("=========================================");
+        System.out.println(cnt);
+        System.out.println(String.valueOf(cnt));
+        
+        Path path = Paths.get("./result_after_tests.txt");
+        try {       
+            if(!path.toFile().exists()){
+                Files.createFile(path);
+            }
+            String frac = "Branch coverage: \n" + String.valueOf(cnt) + " / " + String.valueOf(n);
+            Files.writeString(path, frac, StandardOpenOption.WRITE);
+        } catch(IOException e) {
+            System.out.println("Exception");
+        }
+        System.out.println("=========================================");
+        System.out.println("=========================================");
     }
 
     /**
@@ -463,16 +575,22 @@ public class Difference {
         }
     }
 
-    private void applyKeptDiffElement(Kept kept, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
+    public void applyKeptDiffElement(Kept kept, TextElement originalElement, boolean originalElementIsChild, boolean originalElementIsToken) {
+        cov2[0] = true;
         if (originalElement.isComment()) {
+            cov2[1] = true;
             originalIndex++;
         } else if (kept.isChild() && originalElementIsChild) {
+            cov2[2] = true;
             diffIndex++;
             originalIndex++;
         } else if (kept.isChild() && originalElementIsToken) {
+            cov2[3] = true;
             if (originalElement.isWhiteSpaceOrComment()) {
+                cov2[4] = true;
                 originalIndex++;
             } else if (originalElement.isIdentifier() && isNodeWithTypeArguments(kept)) {
+                cov2[5] = true;
                 diffIndex++;
                 // skip all token related to node with type argument declaration
                 // for example:
@@ -485,55 +603,116 @@ public class Difference {
                 originalIndex += step;
                 originalIndex++;
             } else if (originalElement.isIdentifier()) {
+                cov2[6] = true;
                 originalIndex++;
                 diffIndex++;
             } else {
+                cov2[7] = true;
                 if (kept.isPrimitiveType()) {
+                    cov2[8] = true;
                     originalIndex++;
                     diffIndex++;
                 } else {
-                    throw new UnsupportedOperationException("kept " + kept.getElement() + " vs " + originalElement);
+                    cov2[9] = true;
+                    System.out.println("=========================================>>>>");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+                    System.out.println("=========================================");
+
+
+                    saveToFile2();
+                    throw new UnsupportedOperationException();
                 }
             }
         } else if (kept.isToken() && originalElementIsToken) {
+            cov2[10] = true;
             TokenTextElement originalTextToken = (TokenTextElement) originalElement;
 
             if (kept.getTokenType() == originalTextToken.getTokenKind()) {
+                cov2[11] = true;
                 originalIndex++;
                 diffIndex++;
             } else if (kept.isNewLine() && originalTextToken.isSpaceOrTab()) {
+                cov2[12] = true;
                 originalIndex++;
                 diffIndex++;
              // case where originalTextToken is a separator like ";" and
              // kept is not a new line or whitespace for example "}"
              // see issue 2351
             }  else if (!kept.isNewLine() && originalTextToken.isSeparator()) {
+                cov2[13] = true;
                 originalIndex++;
             } else if (kept.isWhiteSpaceOrComment()) {
+                cov2[14] = true;
                 diffIndex++;
             } else if (originalTextToken.isWhiteSpaceOrComment()) {
+                cov2[15] = true;
                 originalIndex++;
             } else {
+                cov2[16] = true;
+                saveToFile2();
                 throw new UnsupportedOperationException("Csm token " + kept.getElement() + " NodeText TOKEN " + originalTextToken);
             }
         } else if (kept.isWhiteSpace()) {
+            cov2[17] = true;
             diffIndex++;
         } else if (kept.isIndent()) {
+            cov2[18] = true;
             diffIndex++;
         } else if (kept.isUnindent()) {
+            cov2[19] = true;
             // Nothing to do, beside considering indentation
             // However we want to consider the case in which the indentation was not applied, like when we have
             // just a left brace followed by space
 
             diffIndex++;
             if (!openBraceWasOnSameLine()) {
+                cov2[20] = true;
                 for (int i = 0; i < STANDARD_INDENTATION_SIZE && originalIndex >= 1 && nodeText.getTextElement(originalIndex - 1).isSpaceOrTab(); i++) {
+                    cov2[21] = true;
                     nodeText.removeElement(--originalIndex);
                 }
             }
         } else {
+            cov2[22] = true;
+            saveToFile2();
             throw new UnsupportedOperationException("kept " + kept.getElement() + " vs " + originalElement);
         }
+
+        saveToFile2();
+    }
+
+        public void saveToFile2() {
+        int cnt = 0;
+        for (int i = 0; i < n2; i++) {
+            if(cov2[i] == true) {
+                cnt++;
+            }     
+        }
+
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        System.out.println(cnt);
+        System.out.println(String.valueOf(cnt));
+        
+        Path path = Paths.get("./result_before_tests_2.txt");
+        try {       
+            if(!path.toFile().exists()){
+                Files.createFile(path);
+            }
+            String frac = "Branch coverage: \n" + String.valueOf(cnt) + " / " + String.valueOf(n);
+            Files.writeString(path, frac, StandardOpenOption.WRITE);
+        } catch(IOException e) {
+            System.out.println("Exception");
+        }
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     }
 
     /*
