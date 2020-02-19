@@ -169,6 +169,7 @@ public class MethodResolutionLogic {
 
     private static boolean isAssignableMatchTypeParametersMatchingQName(ResolvedReferenceType expected, ResolvedReferenceType actual,
                                                                         Map<String, ResolvedType> matchedParameters) {
+
         if (!expected.getQualifiedName().equals(actual.getQualifiedName())) {
             return false;
         }
@@ -257,18 +258,24 @@ public class MethodResolutionLogic {
         }
     }
 
+    public static int numBranches = 22;
+    public static boolean[] branchVisited = new boolean[numBranches];
 
     public static boolean isApplicable(MethodUsage method, String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver) {
         if (!method.getName().equals(name)) {
+            branchVisited[0] = true;
             //CC = 1
             return false;
         } // else
+        branchVisited[1] = true;
 
         // TODO Consider varargs
         if (method.getNoParams() != argumentsTypes.size()) {
+            branchVisited[2] = true;
             //CC = 2
             return false;
         }
+        branchVisited[3] = true;
         for (int i = 0; i < method.getNoParams(); i++) {
             ResolvedType expectedType = method.getParamType(i);
             ResolvedType expectedTypeWithoutSubstitutions = expectedType;
@@ -279,9 +286,11 @@ public class MethodResolutionLogic {
             typeParameters.addAll(method.declaringType().getTypeParameters());
 
             if (expectedType.describe().equals(actualType.describe())) {
+                branchVisited[4] = true;
                 // CC = 3
                 return true;
             } // else
+            branchVisited[5] = true;
 
             Map<ResolvedTypeParameterDeclaration, ResolvedType> derivedValues = new HashMap<>();
             for (int j = 0; j < method.getParamTypes().size(); j++) {
@@ -289,9 +298,11 @@ public class MethodResolutionLogic {
                 ResolvedType parameterType = parameter.getType();
 
                 if (parameter.isVariadic()) {
+                    branchVisited[6] = true;
                     //CC = 4
                     parameterType = parameterType.asArrayType().getComponentType();
                 } //else
+                branchVisited[7] = true;
                 inferTypes(argumentsTypes.get(j), parameterType, derivedValues);
             }
 
@@ -302,22 +313,27 @@ public class MethodResolutionLogic {
 
             for (ResolvedTypeParameterDeclaration tp : typeParameters) {
                 if (tp.getBounds().isEmpty()) {
+                    branchVisited[8] = true;
                     //CC = 5
                     //expectedType = expectedType.replaceTypeVariables(tp.getName(), new ReferenceTypeUsageImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                     expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.extendsBound(new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver)));
                 } else if (tp.getBounds().size() == 1) {
+                    branchVisited[9] = true;
                     //CC = 6
                     ResolvedTypeParameterDeclaration.Bound bound = tp.getBounds().get(0);
                     if (bound.isExtends()) {
+                        branchVisited[10] = true;
                         //CC = 7
                         //expectedType = expectedType.replaceTypeVariables(tp.getName(), bound.getType());
                         expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.extendsBound(bound.getType()));
                     } else {
+                        branchVisited[11] = true;
                         //CC = 8
                         //expectedType = expectedType.replaceTypeVariables(tp.getName(), new ReferenceTypeUsageImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                         expectedType = expectedType.replaceTypeVariables(tp, ResolvedWildcard.superBound(bound.getType()));
                     }
                 } else {
+                    branchVisited[12] = true;
                     //CC = 9
                     throw new UnsupportedOperationException();
                 }
@@ -325,24 +341,32 @@ public class MethodResolutionLogic {
             ResolvedType expectedType2 = expectedTypeWithoutSubstitutions;
             for (ResolvedTypeParameterDeclaration tp : typeParameters) {
                 if (tp.getBounds().isEmpty()) {
+                    branchVisited[13] = true;
                     //CC = 10
                     expectedType2 = expectedType2.replaceTypeVariables(tp, new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                 } else if (tp.getBounds().size() == 1) {
+                    branchVisited[14] = true;
                     //CC = 11
                     ResolvedTypeParameterDeclaration.Bound bound = tp.getBounds().get(0);
                     if (bound.isExtends()) {
+                        branchVisited[15] = true;
                         //CC = 12
                         expectedType2 = expectedType2.replaceTypeVariables(tp, bound.getType());
                     } else {
+                        branchVisited[16] = true;
                         //CC = 13
                         expectedType2 = expectedType2.replaceTypeVariables(tp, new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
                     }
                 } else {
+                    branchVisited[17] = true;
                     //CC = 14
                     throw new UnsupportedOperationException();
                 }
             }
-
+            branchVisited[18] |= !expectedType.isAssignableBy(actualType); //CC = 15
+            branchVisited[19] |= !expectedType2.isAssignableBy(actualType); //CC = 16
+            branchVisited[20] |= !expectedTypeWithInference.isAssignableBy(actualType); //CC = 17
+            branchVisited[21] |= !expectedTypeWithoutSubstitutions.isAssignableBy(actualType); //CC = 18
             if (!expectedType.isAssignableBy(actualType)
                     && !expectedType2.isAssignableBy(actualType)
                     && !expectedTypeWithInference.isAssignableBy(actualType)
@@ -493,10 +517,10 @@ public class MethodResolutionLogic {
         // If one method declaration has exactly the correct amount of parameters and is not variadic then it is always
         // preferred to a declaration that is variadic (and hence possibly also has a different amount of parameters).
         if (!aVariadic && aNumberOfParams == numberOfArgs && (bVariadic && (bNumberOfParams != numberOfArgs ||
-                                                                            !isLastArgArray))) {
+                !isLastArgArray))) {
             return true;
         } else if (!bVariadic && bNumberOfParams == numberOfArgs && (aVariadic && (aNumberOfParams != numberOfArgs ||
-                                                                                   !isLastArgArray))) {
+                !isLastArgArray))) {
             return false;
         }
 
@@ -519,13 +543,13 @@ public class MethodResolutionLogic {
             // instead of a boxing conversion from int to Integer. See JLS §15.12.2.
             // This is what we check here.
             else if (paramTypeA.isPrimitive() == argType.isPrimitive() &&
-                     paramTypeB.isPrimitive() != argType.isPrimitive() &&
-                     paramTypeA.isAssignableBy(argType)) {
+                    paramTypeB.isPrimitive() != argType.isPrimitive() &&
+                    paramTypeA.isAssignableBy(argType)) {
 
                 return true;
             } else if (paramTypeB.isPrimitive() == argType.isPrimitive() &&
-                       paramTypeA.isPrimitive() != argType.isPrimitive() &&
-                       paramTypeB.isAssignableBy(argType)) {
+                    paramTypeA.isPrimitive() != argType.isPrimitive() &&
+                    paramTypeB.isAssignableBy(argType)) {
 
                 return false;
             }
@@ -639,7 +663,7 @@ public class MethodResolutionLogic {
 
         if (typeDeclaration instanceof MethodResolutionCapability) {
             return ((MethodResolutionCapability) typeDeclaration).solveMethod(name, argumentsTypes,
-                                                                              staticOnly);
+                    staticOnly);
         } else {
             throw new UnsupportedOperationException(typeDeclaration.getClass().getCanonicalName());
         }
