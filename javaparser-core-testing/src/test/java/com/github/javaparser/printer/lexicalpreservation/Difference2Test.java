@@ -108,7 +108,15 @@ class Difference2Test extends AbstractLexicalPreservingTest {
         when(kept.getElement()).thenReturn(csmToken);
 
         //d.applyKeptDiffElement(kept, originalElement, originalElementIsChild, originalElementIsToken);
+
+        boolean thrown = false;
+        try {
+            d.applyKeptDiffElement(kept, originalElement, originalElementIsChild, originalElementIsToken);
+        } catch (UnsupportedOperationException e) {
+            thrown = true;
+        }
+
         
-        assertEquals(1, 1);
+        assertTrue(thrown);
     }
 }

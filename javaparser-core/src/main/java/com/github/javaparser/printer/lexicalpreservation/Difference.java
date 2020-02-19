@@ -614,20 +614,8 @@ public class Difference {
                     diffIndex++;
                 } else {
                     cov2[9] = true;
-                    System.out.println("=========================================>>>>");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-                    System.out.println("=========================================");
-
-
                     saveToFile2();
-                    throw new UnsupportedOperationException();
+                    throw new UnsupportedOperationException("kept " + kept.getElement() + " vs " + originalElement);
                 }
             }
         } else if (kept.isToken() && originalElementIsToken) {
@@ -701,7 +689,7 @@ public class Difference {
         System.out.println(cnt);
         System.out.println(String.valueOf(cnt));
         
-        Path path = Paths.get("./result_before_tests_2.txt");
+        Path path = Paths.get("./result_after_tests_2.txt");
         try {       
             if(!path.toFile().exists()){
                 Files.createFile(path);
