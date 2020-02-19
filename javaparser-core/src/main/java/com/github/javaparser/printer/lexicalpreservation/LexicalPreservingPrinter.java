@@ -494,27 +494,28 @@ public class LexicalPreservingPrinter {
                     nodeText.addToken(DOUBLE, node.toString());
                     break;
                 default:
+                    // CCN 11
                     throw new IllegalArgumentException();
             }
             return;
         }
         if (node instanceof JavadocComment) {
-            // CCN 11
+            // CCN 12
             nodeText.addToken(JAVADOC_COMMENT, "/**" + ((JavadocComment) node).getContent() + "*/");
             return;
         }
         if (node instanceof BlockComment) {
-            // CCN 12
+            // CCN 13
             nodeText.addToken(MULTI_LINE_COMMENT, "/*" + ((BlockComment) node).getContent() + "*/");
             return;
         }
         if (node instanceof LineComment) {
-            // CCN 13
+            // CCN 14
             nodeText.addToken(SINGLE_LINE_COMMENT, "//" + ((LineComment) node).getContent());
             return;
         }
         if (node instanceof Modifier) {
-            // CCN 14
+            // CCN 15
             Modifier modifier = (Modifier) node;
             nodeText.addToken(LexicalDifferenceCalculator.toToken(modifier), modifier.getKeyword().asString());
             return;
