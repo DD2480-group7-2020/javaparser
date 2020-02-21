@@ -1,11 +1,11 @@
 ## Statement of contributions
 
-Simon - insertComments, getDeclarationAsString
-Fabian Waxin: cleanLines, prettyPrintingTextNode
-Gustav Ung: applyAddedDiffElement, calculatedSyntaxModelForNode,
-solveSymbolAsValue
-Ramiz Dündar: applyKeptDiffElement, applyRemovedDiffElement
-Love: jjMoveStringLiteralDfa7_0, isApplicable
+Simon - insertComments, getDeclarationAsString\
+Fabian Waxin: cleanLines, prettyPrintingTextNode\
+Gustav Ung: applyAddedDiffElement, calculatedSyntaxModelForNode
+solveSymbolAsValue\
+Ramiz Dündar: applyKeptDiffElement, applyRemovedDiffElement\
+Love: jjMoveStringLiteralDfa7_0, isApplicable\
 
 # PART 1: Complexity Measurement
 
