@@ -1,18 +1,18 @@
 ## Statement of contributions
 
-**Simon - insertComments, getDeclarationAsString
+Simon - insertComments, getDeclarationAsString
 Fabian Waxin: cleanLines, prettyPrintingTextNode
 Gustav Ung: applyAddedDiffElement, calculatedSyntaxModelForNode,
 solveSymbolAsValue
 Ramiz Dündar: applyKeptDiffElement, applyRemovedDiffElement
-Love: jjMoveStringLiteralDfa7_0, isApplicable**
+Love: jjMoveStringLiteralDfa7_0, isApplicable
 
 # PART 1: Complexity Measurement
 
 Lizard is a tool which analyzes the cyclomatic complexity of programs in many languages,
 counting NLOC, CCN, tokens and parameters of functions in the program. It does not handle
 
-## exceptions aside from counting ​ throw ​s. Catches should be considered an additional branch.
+exceptions aside from counting ​ throw ​s. Catches should be considered an additional branch.
 
 **Function - cleanLines**
 Path: javaparser/javaparser-core/src/main/java/com/github/javaparser/JavadocParser.java
@@ -86,8 +86,6 @@ subclasses of a CsmElement and handle each of those cases. Some subcases such as
 CsmList could be refactored into its own function.
 
 **Function - solveSymbolAsValue**
-
-
 Path:
 javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermo
 del/contexts/LambdaExprContext.java
